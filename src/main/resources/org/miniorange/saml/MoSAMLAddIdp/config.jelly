@@ -1,0 +1,53 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:f="/lib/form">
+<f:section title="Miniorange Saml SP plugin configuration">
+    <f:entry title="IDP Entity ID / Issuer:" field="idpEntityId" >
+        <f:textbox placeholder="Enter Entity ID / Issuer" />
+    </f:entry>
+
+    <f:entry title="Single Sign On URL:" field="ssoUrl" >
+        <f:textbox placeholder="Enter Single Sign On URL" />
+    </f:entry>
+
+    <f:entry title="Single Logout  URL:" field="sslUrl" >
+        <f:textbox placeholder="Enter Single Logout URL" />
+    </f:entry>
+
+    <f:entry title="NameID Format:" field="nameIdFormat" >
+        <select name="nameIdFormat">
+            <option value="urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified">urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified</option>
+            <option value="urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress">urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress</option>
+            <option value="urn:oasis:names:tc:SAML:2.0:nameid-format:persistent">urn:oasis:names:tc:SAML:2.0:nameid-format:persistent</option>
+            <option value="urn:oasis:names:tc:SAML:2.0:nameid-format:transient">urn:oasis:names:tc:SAML:2.0:nameid-format:transient</option>
+        </select>
+    </f:entry>
+
+    <f:entry title="IDP Signing Certificate:" field="x509Certificate" >
+        <f:textarea size="4" placeholder="Enter IDP Signing Certificate:" />
+    </f:entry>
+
+    <f:entry title="Username Attribute:" field="usernameAttribute" >
+        <f:textbox placeholder="Enter Username Attribute" />
+    </f:entry>
+
+    <f:entry title="Email Attribute:" field="emailAttribute" >
+        <f:textbox placeholder="Enter Email Attribute" />
+    </f:entry>
+    <f:entry title="${%Do you want to create users?}" field="userCreate">
+      <f:checkbox/>
+    </f:entry>
+
+    <f:block>
+          <table width="100%">
+            <f:optionalBlock inline="true" title="${%Do you want to Auto Redirect to IDP?}" field="autoRedirectToIDP" >
+             <f:entry title="${%Backdoor/Emergency URL}">
+                       <f:textbox default="${rootURL}/securityRealm/moLoginAction" disabled="true"/>
+                     </f:entry>
+            </f:optionalBlock>
+          </table>
+        </f:block>
+
+    </f:section>
+
+</j:jelly>
+
