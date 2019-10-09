@@ -58,7 +58,7 @@ public class MoSAMLAddIdp extends SecurityRealm{
     public static final String MO_SAML_SP_AUTH_URL = "securityRealm/moSamlAuth";
     public static final String MO_SAML_JENKINS_LOGIN_ACTION = "securityRealm/moLoginAction";
     public static final String MO_SAML_SSO_FORCE_STOP = "securityRealm/moSAMLSingleSignOnForceStop";
-    public static final String MO_SAML_BACKDOOR_URL="securityRealm/moLoginAction";
+
 
     private static final String LOGIN_TEMPLATE_PATH = "/templates/mosaml_login_page_template.html";
 
@@ -69,7 +69,6 @@ public class MoSAMLAddIdp extends SecurityRealm{
     // Information related to Attribute Mapping
     private String usernameAttribute;
     private String emailAttribute;
-    private Boolean autoRedirectToIDP;
     private Boolean userCreate;
 
     @DataBoundConstructor
@@ -79,8 +78,7 @@ public class MoSAMLAddIdp extends SecurityRealm{
                         String x509Certificate,
                         String usernameAttribute,
                         String emailAttribute,
-                        Boolean userCreate,
-                        Boolean autoRedirectToIDP
+                        Boolean userCreate
     ) {
         super();
         this.idpEntityId = idpEntityId;
@@ -89,7 +87,6 @@ public class MoSAMLAddIdp extends SecurityRealm{
         this.usernameAttribute = "NameID";
         this.emailAttribute = "NameID";
         this.userCreate = userCreate;
-        this.autoRedirectToIDP=autoRedirectToIDP;
         if (StringUtils.isNotEmpty(usernameAttribute)) {
             this.usernameAttribute = usernameAttribute;
         }
@@ -104,7 +101,7 @@ public class MoSAMLAddIdp extends SecurityRealm{
             generateUserMetadataFile();
         }
         catch (IOException e) {
-            LOGGER.fine("Error during generating IDP metadata file");
+            //LOGGER.fine("Error during generating IDP metadata file");
         }
 
 
@@ -112,12 +109,6 @@ public class MoSAMLAddIdp extends SecurityRealm{
     }
     @Override
     public String getLoginUrl() {
-        if(autoRedirectToIDP)
-        {
-
-            return "securityRealm/moSamlLogin";
-        }
-
         return "securityRealm/moLoginAction";
     }
     @Override
@@ -126,9 +117,9 @@ public class MoSAMLAddIdp extends SecurityRealm{
 
             super.doLogout(req, rsp);
         } catch (ServletException e) {
-            LOGGER.fine("Throwing Servlet Exception during logout");
+            //LOGGER.fine("Throwing Servlet Exception during logout");
         } catch (IOException e) {
-            LOGGER.fine("Throwing IOException during logout");
+            //LOGGER.fine("Throwing IOException during logout");
         }
     }
 
@@ -137,12 +128,17 @@ public class MoSAMLAddIdp extends SecurityRealm{
         return "securityRealm/moLoginAction";
     }
 
-    public HttpResponse doMoLogin(final StaplerRequest request, final StaplerResponse response)
+    public HttpResponse doMoLogin(final StaplerRequest request, final StaplerResponse response,String errorMessage)
     {
         return new HttpResponse() {
             public void generateResponse(StaplerRequest req, StaplerResponse rsp, Object node) throws IOException, ServletException {
                 rsp.setContentType("text/html;charset=UTF-8");
                 String html = IOUtils.toString(MoSAMLAddIdp.class.getResourceAsStream(LOGIN_TEMPLATE_PATH), "UTF-8");
+                if(StringUtils.isNotBlank(errorMessage))
+                {
+                    html = html.replace("<input type=\"hidden\" />", errorMessage);
+                    //System.out.println(html);
+                }
                 rsp.getWriter().println(html);
             }
         };
@@ -158,13 +154,13 @@ public class MoSAMLAddIdp extends SecurityRealm{
             if (StringUtils.isNotBlank(username)) {
                 final User user_jenkin = User.getById(username,false);
                 if (user_jenkin != null) {
-                    LOGGER.fine("User exist with username = " + username);
+                    //LOGGER.fine("User exist with username = " + username);
                     try {
                         new MoHudsonPrivateSecurityRealm().authenticate(username, password);
-                        LOGGER.fine("Valid User Password");
+                        //LOGGER.fine("Valid User Password");
                         isValidUser = Boolean.TRUE;
                     } catch (Exception e) {
-                        LOGGER.fine("InValid User Password");
+                        //LOGGER.fine("InValid User Password");
                         isValidUser = Boolean.FALSE;
                     }
                     if(isValidUser)
@@ -201,10 +197,15 @@ public class MoSAMLAddIdp extends SecurityRealm{
     private String customLoginTemplate(StaplerResponse response, String errorMessage) throws IOException {
         response.setContentType("text/html;charset=UTF-8");
         String html = IOUtils.toString(MoSAMLAddIdp.class.getResourceAsStream(LOGIN_TEMPLATE_PATH), "UTF-8");
-        LOGGER.fine("Html : "+html);
-        LOGGER.fine("contains : "+html.contains("<input type=\"hidden\" />"));
+        //LOGGER.fine("Html : "+html);
+        //System.out.println(errorMessage);
+
+        //LOGGER.fine("contains : "+html.contains("<input type=\"hidden\" />"));
         if (StringUtils.isNotBlank(errorMessage)) {
+            //System.out.println(errorMessage);
+
             html = html.replace("<input type=\"hidden\" />", errorMessage);
+           // System.out.println(html);
         }
         return html;
     }
@@ -212,10 +213,10 @@ public class MoSAMLAddIdp extends SecurityRealm{
         RedirectAction action = null;
         action = new MoSAMLLoginRedirectAction(getMoSAMLPluginSettings(), request, response).get();
         if (RedirectType.SUCCESS == action.getType()) {
-            LOGGER.fine("SUCCESS Content: " + action.getContent());
+           // LOGGER.fine("SUCCESS Content: " + action.getContent());
             return HttpResponses.literalHtml(action.getContent());
         } else if (RedirectType.REDIRECT == action.getType()) {
-            LOGGER.fine("REDIRECT Location : " + action.getLocation());
+           // LOGGER.fine("REDIRECT Location : " + action.getLocation());
             return HttpResponses.redirectTo(action.getLocation());
         } else {
             throw new IllegalStateException("Invalid response" + action.getType());
@@ -227,7 +228,7 @@ public class MoSAMLAddIdp extends SecurityRealm{
         return Jenkins.get().getRootUrl();
     }
     private String getErrorUrl() {
-        return Jenkins.get().getRootUrl()+MO_SAML_BACKDOOR_URL;
+        return Jenkins.get().getRootUrl()+MO_SAML_JENKINS_LOGIN_ACTION;
     }
    private String getUserMetadataFilePath() {
         return jenkins.model.Jenkins.getInstance().getRootDir().getAbsolutePath() + "/jenkins-saml-user-metadata.txt";
@@ -242,7 +243,7 @@ public class MoSAMLAddIdp extends SecurityRealm{
         String samlResponse = request.getParameter("SAMLResponse");
         MoSAMLPluginSettings settings = getMoSAMLPluginSettings();
         String xmlData = new String(Base64.getDecoder().decode(samlResponse));
-        LOGGER.fine("Decoded String = "+xmlData);
+        //LOGGER.fine("Decoded String = "+xmlData);
         try {
             String username="";
             String email="";
@@ -298,6 +299,9 @@ public class MoSAMLAddIdp extends SecurityRealm{
                         if(settings.getUserCreate()){
                             //System.out.println(getUserMetadataFilePath());
                             File file = new File( getUserMetadataFilePath());
+                            Path p = Paths.get(getUserMetadataFilePath());
+                            // DosFileAttributes dos = Files.readAttributes(p, DosFileAttributes.class);
+                            Files.setAttribute(p, "dos:hidden", false);
                             if(file.exists())
                             {
                                 Scanner scanner = new Scanner(file);
@@ -322,59 +326,59 @@ public class MoSAMLAddIdp extends SecurityRealm{
                                 SecurityContextHolder.getContext().setAuthentication(tokenInfo);
                                 SecurityListener.fireAuthenticated(userInfo);
                                 SecurityListener.fireLoggedIn(new_user.getId());
-                                File f=new File(getUserMetadataFilePath());
-                                if(f.exists()){
-                                    System.out.println(noOfUsers+1);
-                                    PrintWriter writer = new PrintWriter(f);
-                                    writer.print((noOfUsers + 1));
-                                    writer.close();
+                                {
+                                    FileWriter fr = new FileWriter(file, false);
+                                    LOGGER.fine("file writerr openend");
+                                    BufferedWriter br = new BufferedWriter(fr);
+                                    br.write(String.valueOf(noOfUsers+1));
+                                    br.close();
+                                    fr.close();
+                                    Files.setAttribute(p, "dos:hidden", true);
                                     return HttpResponses.redirectTo(getBaseUrl());
                                    }
-                                else{
-                                    System.out.println("file not found error");
-                                    String errorMessage = "<div class=\"alert alert-danger\">Error occured </div><br>";
-                                    String html = customLoginTemplate(response,errorMessage);
-                                    response.getWriter().println(html);}
 
                             }
                             else {
-                                System.out.println("premiuim error");
+                                LOGGER.fine("premium error");
                                 String errorMessage = "<div class=\"alert alert-danger\">Upgrade to Premium</div><br>";
-                                String html = customLoginTemplate(response,errorMessage);
-                                response.getWriter().println(html);}
+                                //String html = customLoginTemplate(response,errorMessage);
+                                return doMoLogin(request, response,errorMessage);}
+                                //return HttpResponses.redirectTo(getErrorUrl());
                             }
                             else {
-                                System.out.println("invalid username error");
+                                LOGGER.fine("Invalid username error");
                                 String errorMessage = "<div class=\"alert alert-danger\">Invalid username</div><br>";
-                                String html = customLoginTemplate(response,errorMessage);
-                                response.getWriter().println(html);
+                                //String html = customLoginTemplate(response,errorMessage);
+                                return doMoLogin(request, response,errorMessage);
                             }
                         } else {
-                            System.out.println("no username create error");
-                            return HttpResponses.redirectTo(getBaseUrl());
+                            LOGGER.fine("No new user create");
+                            String errorMessage = "<div class=\"alert alert-danger\">User creation not allowed!</div><br>";
+                            return doMoLogin(request, response,errorMessage);
+                            //return HttpResponses.redirectTo(getErrorUrl());
                         }
                     } catch (Exception ex) {
-                        System.out.println("catch user  create error error");
+                        //ex.printStackTrace();
+                       // LOGGER.fine("catch error"+ex);
                         String errorMessage = "<div class=\"alert alert-danger\">Error occurred .Please contact administrator.</div><br>";
-                        String html = customLoginTemplate(response,errorMessage);
-                        response.getWriter().println(html);
+                        //String html = customLoginTemplate(response,errorMessage);
+                       // LOGGER.fine("error occured "+ex);
+                        return doMoLogin(request, response,errorMessage);
                         //return HttpResponses.redirectTo(getErrorUrl());
                     }
                 }
             } else {
-                System.out.println("username is balnk error");
+                LOGGER.fine("Username is blank error");
                 String errorMessage = "<div class=\"alert alert-danger\">Username is blank.</div><br>";
-                String html = customLoginTemplate(response,errorMessage);
-                response.getWriter().println(html);
-                //return HttpResponses.redirectTo(getErrorUrl());
+                return doMoLogin(request, response,errorMessage);
+               // return HttpResponses.redirectTo(getErrorUrl());
             }
         } catch (Exception ex) {
-            System.out.println("response is invalid error");
+            LOGGER.fine("Invalid response");
             String errorMessage = "<div class=\"alert alert-danger\">Response is invalid.</div><br>";
-            String html = customLoginTemplate(response,errorMessage);
-            response.getWriter().println(html);
+            return doMoLogin(request, response,errorMessage);
+            //return HttpResponses.redirectTo(getErrorUrl());
         }
-        return HttpResponses.redirectTo(getErrorUrl());
     }
 
     /*private Document convertStringToXMLDocument(String xmlString)
@@ -433,7 +437,7 @@ public class MoSAMLAddIdp extends SecurityRealm{
     }
 
     private void createSession(StaplerRequest request) {
-        LOGGER.fine("Create Session method is called");
+     //   LOGGER.fine("Create Session method is called");
         HttpSession session = request.getSession(false);
         if (session != null) {
             session.invalidate();
@@ -491,7 +495,7 @@ public class MoSAMLAddIdp extends SecurityRealm{
     }
 
     private MoSAMLPluginSettings getMoSAMLPluginSettings()  {
-        MoSAMLPluginSettings settings = new MoSAMLPluginSettings(idpEntityId, ssoUrl, sslUrl, x509Certificate, usernameAttribute, emailAttribute,userCreate,autoRedirectToIDP,0);
+        MoSAMLPluginSettings settings = new MoSAMLPluginSettings(idpEntityId, ssoUrl, sslUrl, x509Certificate, usernameAttribute, emailAttribute,userCreate,0);
         return  settings;
     }
 
@@ -523,13 +527,15 @@ public class MoSAMLAddIdp extends SecurityRealm{
                 br.write("0");
                 br.close();
                 fr.close();
+                file.setWritable(true);
                 Path p = Paths.get(getUserMetadataFilePath());
                // DosFileAttributes dos = Files.readAttributes(p, DosFileAttributes.class);
                 Files.setAttribute(p, "dos:hidden", true);
                 //System.out.println("file is made hidden+!!!");
             }
+
         } catch (IOException e) {
-            LOGGER.fine("error during generation of user metadata file.");
+           // LOGGER.fine("error during generation of user metadata file.");
         }
     }
 

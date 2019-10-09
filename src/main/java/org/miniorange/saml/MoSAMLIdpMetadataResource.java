@@ -16,7 +16,7 @@ public class MoSAMLIdpMetadataResource implements WritableResource {
     private String fileName;
 
     public MoSAMLIdpMetadataResource(String fileName) {
-        LOGGER.fine("MoSAMLIdpMetadataResource constructor is called");
+        //LOGGER.fine("MoSAMLIdpMetadataResource constructor is called");
         if (StringUtils.isNotEmpty(fileName)) {
             this.fileName = fileName;
         }

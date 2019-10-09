@@ -36,17 +36,6 @@
     <f:entry title="${%Do you want to create users?}" field="userCreate">
       <f:checkbox/>
     </f:entry>
-
-    <f:block>
-          <table width="100%">
-            <f:optionalBlock inline="true" title="${%Do you want to Auto Redirect to IDP?}" field="autoRedirectToIDP" >
-             <f:entry title="${%Backdoor/Emergency URL}">
-                       <f:textbox default="${rootURL}/securityRealm/moLoginAction" disabled="true"/>
-                     </f:entry>
-            </f:optionalBlock>
-          </table>
-        </f:block>
-
     </f:section>
 
 </j:jelly>

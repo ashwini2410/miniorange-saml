@@ -14,9 +14,8 @@ public class MoSAMLPluginSettings {
     private String usernameAttribute;
     private String emailAttribute;
    private final Boolean userCreate;
-   private final Boolean autoRedirectToIDP;
    private int noOfUsers=0;
-    public MoSAMLPluginSettings (String idpEntityId, String ssoUrl, String sslUrl, String x509Certificate, String usernameAttribute, String emailAttribute,Boolean userCreate,Boolean autoRedirectToIDP,int noOfUsers) {
+    public MoSAMLPluginSettings (String idpEntityId, String ssoUrl, String sslUrl, String x509Certificate, String usernameAttribute, String emailAttribute,Boolean userCreate,int noOfUsers) {
         this.idpEntityId = idpEntityId;
         this.ssoUrl = ssoUrl;
         this.sslUrl = sslUrl;
@@ -24,10 +23,7 @@ public class MoSAMLPluginSettings {
         this.usernameAttribute = usernameAttribute;
         this.emailAttribute = emailAttribute;
         this.userCreate = (userCreate != null) ? userCreate : false;
-        this.autoRedirectToIDP=(autoRedirectToIDP != null) ? autoRedirectToIDP : false;
         this.noOfUsers=noOfUsers;
-
-        //System.out.println(autoRedirectToIDP);
     }
 
     public String getIdpEntityId() {
@@ -64,23 +60,7 @@ public class MoSAMLPluginSettings {
     }
 
      public Boolean getUserCreate() {
-         //System.out.println(userCreate+"))))))))))))))))))))))");
         return userCreate;
-    }
-
-    public Boolean getAutoRedirectToIDP()
-    {
-        return autoRedirectToIDP;
-
-    }
-
-    public int getNoOfUsers() {
-        return noOfUsers;
-
-    }
-
-    public void setNoOfUsers(int val) {
-       this.noOfUsers=val;
     }
 
 }

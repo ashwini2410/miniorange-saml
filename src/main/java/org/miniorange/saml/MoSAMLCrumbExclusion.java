@@ -28,7 +28,7 @@ public class MoSAMLCrumbExclusion extends CrumbExclusion {
         if (
                 pathInfo.indexOf(MoSAMLAddIdp.MO_SAML_SP_AUTH_URL) > 0
             || pathInfo.indexOf(MoSAMLAddIdp.MO_SAML_SSO_FORCE_STOP) > 0
-            || pathInfo.indexOf(MoSAMLAddIdp.MO_SAML_JENKINS_LOGIN_ACTION) > 0||pathInfo.indexOf(MoSAMLAddIdp.MO_SAML_BACKDOOR_URL)>0
+            || pathInfo.indexOf(MoSAMLAddIdp.MO_SAML_JENKINS_LOGIN_ACTION) > 0
         ) {
             return true;
         } else {
