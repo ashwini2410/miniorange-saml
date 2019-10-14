@@ -1,14 +1,10 @@
 package org.miniorange.saml;
-//import jenkins.model.JenkinsLocationConfiguration;
 import org.acegisecurity.Authentication;
-//import hudson.XmlFile;
-//import hudson.security.Permission;
 import hudson.Extension;
 import hudson.model.Descriptor;
 import hudson.model.User;
 import hudson.security.HudsonPrivateSecurityRealm;
 import hudson.security.SecurityRealm;
-//import hudson.tasks.Mailer.UserProperty;
 import hudson.util.FormValidation;
 import jenkins.model.Jenkins;
 import jenkins.security.SecurityListener;
@@ -23,9 +19,6 @@ import org.pac4j.core.client.RedirectAction.RedirectType;
 import org.pac4j.saml.profile.SAML2Profile;
 import org.w3c.dom.Document;
 import org.apache.commons.io.IOUtils;
-
-//import javax.servlet.http.HttpServletRequest;
-//import javax.servlet.http.HttpServletResponse;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.servlet.ServletException;
@@ -33,14 +26,9 @@ import javax.servlet.http.HttpSession;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
-/*import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.attribute.DosFileAttributes;*/
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.attribute.DosFileAttributes;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -51,7 +39,6 @@ import org.xml.sax.InputSource;
 import org.acegisecurity.AuthenticationException;
 import org.acegisecurity.BadCredentialsException;
 import hudson.tasks.Mailer;
-//import hudson.XmlFile;
 public class MoSAMLAddIdp extends SecurityRealm{
 
     private static final Logger LOGGER = Logger.getLogger(MoSAMLAddIdp.class.getName());
@@ -101,7 +88,7 @@ public class MoSAMLAddIdp extends SecurityRealm{
             generateUserMetadataFile();
         }
         catch (IOException e) {
-            //LOGGER.fine("Error during generating IDP metadata file");
+            LOGGER.fine("Error during generating IDP metadata file");
         }
 
 
@@ -247,33 +234,71 @@ public class MoSAMLAddIdp extends SecurityRealm{
         try {
             String username="";
             String email="";
-            DocumentBuilder db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+            DocumentBuilderFactory documentBuilderFactory=DocumentBuilderFactory.newInstance();
+            documentBuilderFactory.setNamespaceAware(true);
+            DocumentBuilder db = documentBuilderFactory.newDocumentBuilder();
             InputSource is = new InputSource();
             is.setCharacterStream(new StringReader(xmlData));
             Document doc = db.parse(is);
             Element element = doc.getDocumentElement();
            // NodeList nodes = element.getChildNodes();
-            NodeList node1 = doc.getElementsByTagName("saml:Subject");
+            NodeList node1 = doc.getElementsByTagNameNS("*","Subject");
             for(int i=0; i<node1.getLength(); i++)
             {
                 Node User_Node = node1.item(i);
                 if(User_Node.getNodeType() == Node.ELEMENT_NODE)
                 {
                     Element UserNameElement = (Element) User_Node;
-                     username = UserNameElement.getElementsByTagName("saml:NameID").item(0).getTextContent();
+                 username = UserNameElement.getElementsByTagNameNS("*","NameID").item(0).getTextContent();
+                     LOGGER.fine(username);
                 }
             }
-            NodeList node2 = doc.getElementsByTagName("saml:AttributeStatement");
+            NodeList node2 = doc.getElementsByTagNameNS("*","AttributeStatement");
             for(int i=0; i<node2.getLength(); i++)
             {
                 Node Email_Node = node2.item(i);
                 if(Email_Node.getNodeType() == Node.ELEMENT_NODE)
                 {
                     Element studentElement1 = (Element) Email_Node;
-                     email= studentElement1.getElementsByTagName("saml:Attribute").item(0).getTextContent();
+                   email= studentElement1.getElementsByTagNameNS("*","Attribute").item(0).getTextContent();
+                     LOGGER.fine(email);
 
                 }
             }
+
+
+
+
+
+            /*NodeList node3 = doc.getElementsByTagName("saml:Subject");
+            for(int i=0; i<node3.getLength(); i++)
+            {
+                Node User_Node = node3.item(i);
+                if(User_Node.getNodeType() == Node.ELEMENT_NODE)
+                {
+                    Element UserNameElement = (Element) User_Node;
+                    username = UserNameElement.getElementsByTagName("saml:NameID").item(0).getTextContent();
+                    LOGGER.fine(username);
+                }
+            }
+            NodeList node4 = doc.getElementsByTagName("saml:AttributeStatement");
+            for(int i=0; i<node4.getLength(); i++)
+            {
+                Node Email_Node = node4.item(i);
+                if(Email_Node.getNodeType() == Node.ELEMENT_NODE)
+                {
+                    Element studentElement1 = (Element) Email_Node;
+                    email= studentElement1.getElementsByTagName("saml:Attribute").item(0).getTextContent();
+                    LOGGER.fine(email);
+
+                }
+            }*/
+
+
+
+
+
+
             /*//NodeList subnodes=nodes.item(3).getChildNodes();
             //String username=subnodes.item(1).getTextContent();
             //NodeList subnodes2=subnodes.item(4).getChildNodes();
