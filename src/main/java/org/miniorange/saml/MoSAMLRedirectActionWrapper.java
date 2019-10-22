@@ -24,7 +24,6 @@ public abstract class MoSAMLRedirectActionWrapper<T> {
     public T get() {
         T value = null;
         try {
-            //LOGGER.fine("get method is called");
             Thread thread = Thread.currentThread();
             ClassLoader loader = thread.getContextClassLoader();
             thread.setContextClassLoader(InitializationService.class.getClassLoader());
@@ -35,20 +34,16 @@ public abstract class MoSAMLRedirectActionWrapper<T> {
                 thread.setContextClassLoader(loader);
             }
         } catch (InitializationException e) {
-            //LOGGER.fine("Failed to initialize SAML request");
             throw new IllegalStateException(e);
         }
         return value;
     }
 
     protected WebContext getWebContext() {
-        //LOGGER.fine("request = "+request);
-       // LOGGER.fine("response = "+response);
         return new J2EContext(request, response);
     }
 
     protected SAML2Client getSAML2Client() {
-        //LOGGER.fine("getSAML2Client is called");
         SAML2ClientConfiguration configuration = new SAML2ClientConfiguration();
         configuration.setDestinationBindingType("urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST");
         configuration.setIdentityProviderMetadataResource(new MoSAMLIdpMetadataResource(MoSAMLAddIdp.getIDPMetadataFilePath()));
@@ -69,8 +64,6 @@ public abstract class MoSAMLRedirectActionWrapper<T> {
         SAML2Client saml2Client = new SAML2Client(configuration);
         saml2Client.setCallbackUrl(settings.getSpAcsUrl());
         saml2Client.init(getWebContext());
-
-        //LOGGER.fine("SP Metadata : "+saml2Client.getServiceProviderMetadataResolver().getMetadata());
 
         return saml2Client;
     }

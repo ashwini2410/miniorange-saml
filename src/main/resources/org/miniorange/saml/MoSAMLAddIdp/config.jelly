@@ -8,11 +8,6 @@
     <f:entry title="Single Sign On URL:" field="ssoUrl" >
         <f:textbox placeholder="Enter Single Sign On URL" />
     </f:entry>
-
-    <f:entry title="Single Logout  URL:" field="sslUrl" >
-        <f:textbox placeholder="Enter Single Logout URL" />
-    </f:entry>
-
     <f:entry title="NameID Format:" field="nameIdFormat" >
         <select name="nameIdFormat">
             <option value="urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified">urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified</option>
